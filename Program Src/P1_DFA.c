@@ -54,8 +54,8 @@ int main()
 
 	int initialState = -1;
 	int currentState = -1;
-	int numberOfTransisation = 0;
-	int numberOfVariables = 0;
+	int numberOfStates = 0;
+	int numberOfInputs = 0;
 
 	fscanf(filePointer, "%d%c", &initialState, &ch1);
 	printf("Initial state : %d\n", initialState);
@@ -77,20 +77,22 @@ int main()
 		DFA_Table[i][j] = tempInt1;
 		j++;
 		if (ch1 == '\n')
-			numberOfVariables = j, j = 0, i++;
+			numberOfInputs = j, j = 0, i++;
 	}
-	numberOfTransisation = i;
+	numberOfStates = i;
+	fclose(filePointer);
 
 	printf("Transistion Table\n");
-	for (i = 0; i < numberOfTransisation; ++i)
+	printf("| State | Input(0) | Input(1) |\n");
+	for (i = 0; i < numberOfStates; ++i)
 	{
-		for (j = 0; j < numberOfVariables; ++j)
+		printf("| %3d   | ", i);
+		for (j = 0; j < numberOfInputs; j++)
 		{
-			printf("%d ", DFA_Table[i][j]);
+			printf("   %3d   | ", DFA_Table[i][j]);
 		}
 		printf("\n");
 	}
-	fclose(filePointer);
 
 	int flag = 0;
 	char inputString[100] = {0};
@@ -99,7 +101,6 @@ int main()
 	while (1)
 	{
 		printf("\n------------------------\nEnter input string ('#' to exit) : ");
-		// scanf("%s", inputString);
 		inputStringLen = Read(inputString);
 
 		if (inputString[0] == '#')

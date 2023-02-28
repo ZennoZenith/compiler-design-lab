@@ -20,6 +20,7 @@ int Read(char *str)
 	}
 }
 
+
 int main()
 {
 
@@ -30,7 +31,7 @@ int main()
 	char str2[10] = {0};
 
 	FILE *filePointer = NULL;
-	filePointer = fopen("MOORE2.txt", "r");
+	filePointer = fopen("MOORE3.txt", "r");
 
 	if (filePointer == NULL)
 	{
@@ -44,7 +45,7 @@ int main()
 	for (i = 0; i < MAX_TRANSISTION; ++i)
 	{
 		for (j = 0; j < MAX_VARIABLES; ++j)
-			Transistion_Table[i][j] = 0;
+			Transistion_Table[i][j] = -1;
 		OutputTable[i][0] = '\0';
 	}
 
@@ -109,6 +110,11 @@ int main()
 
 		printf("Input string : %s, Input string len : %d\n\n", inputString, inputStringLen);
 
+		if(initialState != -1) 
+		{	strcat(outputString, OutputTable[initialState]);
+			strcat(outputString, " ");
+		}
+
 		currentState = initialState;
 		flag = 0;
 		for (i = 0; i < inputStringLen; ++i)
@@ -118,18 +124,15 @@ int main()
 			printf("input string and state transition : %d , q%d / %s -> ", tempInt1, currentState, OutputTable[currentState]);
 			int oldState = currentState;
 			currentState = Transistion_Table[currentState][tempInt1];
-			strcat(outputString, OutputTable[currentState]);
-
 			if (currentState == -1)
 			{
 				printf("NO TRANSISTION\n");
 				flag = 1;
 				break;
 			}
-			printf("q%d / %c\n", currentState, outputString[i]);
+			strcat(outputString, OutputTable[currentState]);
+			printf("q%d / %s\n", currentState, OutputTable[currentState]);
 		}
-		outputString[i] = '\0';
-
 		printf("\nOutput of Moore Machine : %s\n", outputString);
 	}
 

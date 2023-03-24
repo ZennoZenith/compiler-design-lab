@@ -7,8 +7,6 @@
 
 using namespace std;
 
-template <typename T>
-
 int Read(char *str)
 {
   int i = 0;
@@ -23,8 +21,16 @@ int Read(char *str)
     i++;
   }
 }
+template <typename T>
+void printSet(set<T> &set1)
+{
+  for (auto i = set1.begin(); i != set1.end(); ++i)
+    cout << *i << " ";
+  cout << endl;
+}
 
-void printSet(set<char> &set1)
+template <typename T>
+void printVector(vector<T> &set1)
 {
   for (auto i = set1.begin(); i != set1.end(); ++i)
     cout << *i << " ";
@@ -53,10 +59,10 @@ int main()
   map<char, set<char>> followOf;
 
   FILE *filePointer = NULL;
-  filePointer = fopen("FirstFollow5.txt", "r");
+  filePointer = fopen("LLParsingTable2.txt", "r");
   if (filePointer == NULL)
   {
-    printf("Unable to open FirstFollow.txt\n");
+    printf("Unable to open LLParsingTable.txt\n");
     return 1;
   }
 
@@ -278,7 +284,6 @@ int main()
         followOf[*nonTerminal].erase(itrToBeErased);
     }
   }
-
   //* Print first of
   cout << "First of : \n";
   for (auto i = firstOf.begin(); i != firstOf.end(); ++i)
@@ -300,7 +305,74 @@ int main()
     printSet(followOfCh);
   }
   cout << endl;
-  return 0;
+
+  terminals.insert('$');
+  vector<vector<vector<int>>> LLParsingTable;
+  int i = 0, j = 0;
+  for (auto notTerminal = nonTerminals.begin(); notTerminal != nonTerminals.end(); notTerminal++, i++)
+  {
+    j = 0;
+    vector<vector<int>> tempVV;
+    LLParsingTable.push_back(tempVV);
+    for (auto terminal = terminals.begin(); terminal != terminals.end(); terminal++, j++)
+    {
+      vector<int> tempV;
+      LLParsingTable[i].push_back(tempV);
+      // if (firstOf[*notTerminal].find(*terminal) == firstOf[*notTerminal].end())
+      //   continue;
+
+      // printf("%c\n", *notTerminal);
+      int k = 0;
+      for (auto CFG2DCol = CFG2D.begin(); CFG2DCol != CFG2D.end(); CFG2DCol++, k++)
+      {
+        if (*notTerminal != (*CFG2DCol)[0])
+          continue;
+        if (firstOf[*notTerminal].find('#') != firstOf[*notTerminal].end())
+        {
+          if (followOf[*notTerminal].find(*terminal) != followOf[*notTerminal].end())
+          {
+            if ('#' == (*CFG2DCol)[1])
+              LLParsingTable[i][j].push_back(k);
+          }
+        }
+        for (auto CFG2DRow = (*CFG2DCol).begin() + 1; CFG2DRow != (*CFG2DCol).end(); CFG2DRow++)
+        {
+          if (*CFG2DRow == *terminal)
+          {
+            LLParsingTable[i][j].push_back(k);
+            break;
+          }
+          else if (terminals.find(*CFG2DRow) != terminals.end())
+            break;
+          else if (nonTerminals.find(*CFG2DRow) != nonTerminals.end())
+          {
+            if (*notTerminal == *CFG2DRow)
+              break;
+            if (firstOf[*CFG2DRow].find(*terminal) != firstOf[*CFG2DRow].end())
+            {
+              LLParsingTable[i][j].push_back(k);
+              break;
+            }
+
+            if (firstOf[*CFG2DRow].find('#') == firstOf[*CFG2DRow].end())
+              break;
+          }
+        }
+      }
+    }
+  }
+
+  // Printing LL Parsing table
+  i = 0;
+  for (auto notTerminal = nonTerminals.begin(); notTerminal != nonTerminals.end(); notTerminal++, i++)
+  {
+    j = 0;
+    for (auto terminal = terminals.begin(); terminal != terminals.end(); terminal++, j++)
+    {
+      printf("%c, %c : ", *notTerminal, *terminal);
+      printVector(LLParsingTable[i][j]);
+    }
+  }
 
   return 0;
 }

@@ -1,4 +1,5 @@
 #include <iostream>
+#include <stdio.h>
 #include <vector>
 #include <map>
 #include <set>
@@ -34,7 +35,7 @@ void printVector(vector<T> &set1)
 {
   for (auto i = set1.begin(); i != set1.end(); ++i)
     cout << *i << " ";
-  cout << endl;
+  // cout << endl;
 }
 
 set<char>::iterator intersection(set<char> &set1, set<char> &set2)
@@ -100,14 +101,17 @@ int main()
   cout << endl;
 
   cout << "CFG : \n";
+  int index = 0;
   for (auto i = CFG2D.begin(); i != CFG2D.end(); ++i)
   {
     auto j = (*i).begin();
+    printf("%2d : ", index);
     cout << *j << " --> ";
     ++j;
     for (; j != (*i).end(); ++j)
       cout << *j;
     cout << endl;
+    index++;
   }
   cout << endl;
 
@@ -306,6 +310,7 @@ int main()
   }
   cout << endl;
 
+  // Calculate LL Parsing Table
   terminals.insert('$');
   vector<vector<vector<int>>> LLParsingTable;
   int i = 0, j = 0;
@@ -318,10 +323,6 @@ int main()
     {
       vector<int> tempV;
       LLParsingTable[i].push_back(tempV);
-      // if (firstOf[*notTerminal].find(*terminal) == firstOf[*notTerminal].end())
-      //   continue;
-
-      // printf("%c\n", *notTerminal);
       int k = 0;
       for (auto CFG2DCol = CFG2D.begin(); CFG2DCol != CFG2D.end(); CFG2DCol++, k++)
       {
@@ -364,14 +365,29 @@ int main()
 
   // Printing LL Parsing table
   i = 0;
+  cout << "Non-Terminal Terminal    Productions\n";
   for (auto notTerminal = nonTerminals.begin(); notTerminal != nonTerminals.end(); notTerminal++, i++)
   {
     j = 0;
     for (auto terminal = terminals.begin(); terminal != terminals.end(); terminal++, j++)
     {
-      printf("%c, %c : ", *notTerminal, *terminal);
-      printVector(LLParsingTable[i][j]);
+      printf("    %c           %c         ", *notTerminal, *terminal);
+      if (LLParsingTable[i][j].size() == 0)
+      {
+        cout << "--\n";
+        continue;
+      }
+      for (int len = 0; len < LLParsingTable[i][j].size(); len++)
+      {
+        int index = LLParsingTable[i][j][len];
+        cout << CFG2D[index][0] << " --> ";
+        for (int k = 1; k != CFG2D[index].size(); ++k)
+          cout << CFG2D[index][k];
+        printf(" ; ");
+      }
+      cout << endl;
     }
+    cout << endl;
   }
 
   return 0;

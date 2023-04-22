@@ -39,6 +39,29 @@ void printVector(vector<T> &set1)
   // cout << endl;
 }
 
+template <typename T>
+int findInVector(vector<T> &vec, T elementToFind)
+{
+  int i = 0;
+  for (auto &element : vec)
+  {
+    // printf("%c", element);
+    if (element == elementToFind)
+      return i;
+    i++;
+  }
+  return -1;
+}
+
+void printRule(vector<vector<char>> CFG2D, int ruleNumber)
+{
+  auto rule = CFG2D[ruleNumber].begin();
+  printf("%2d : ", ruleNumber);
+  cout << *rule << " --> ";
+  ++rule;
+  for (; rule != CFG2D[ruleNumber].end(); ++rule)
+    cout << *rule;
+}
 int main()
 {
   FILE *filePointer = NULL;
@@ -180,16 +203,10 @@ int main()
 
   cout << "CFG : \n";
   int index = 0;
-  for (auto i = CFG2D.begin(); i != CFG2D.end(); ++i)
+  for (int i = 0; i < CFG2D.size(); ++i)
   {
-    auto j = (*i).begin();
-    printf("%2d : ", index);
-    cout << *j << " --> ";
-    ++j;
-    for (; j != (*i).end(); ++j)
-      cout << *j;
+    printRule(CFG2D, i);
     cout << endl;
-    index++;
   }
   cout << endl;
 
@@ -239,8 +256,98 @@ int main()
     }
     cout << endl;
   }
-
   cout << endl;
+
+  int flag = 0;
+  char inputString[100] = {0};
+  int inputStringLen = 0;
+  int lookAheadIndex = 0;
+  int ruleNumber = -1;
+  string parseStack;
+  while (1)
+  {
+    printf("\n------------------------\nEnter input string ('#' to exit) : ");
+    inputStringLen = Read(inputString);
+
+    if (inputString[0] == '#')
+      break;
+    inputString[inputStringLen++] = '$';
+    inputString[inputStringLen] = '\0';
+    printf("Input string : %s, Input string len : %d\n\n", inputString, inputStringLen);
+
+    lookAheadIndex = 0;
+    parseStack.clear();
+    parseStack.push_back('$');
+    parseStack.push_back(startSymbol);
+    char top;
+    int m, n;
+    flag = 0;
+    printf("     Stack          Input         Action\n");
+    while (parseStack.size() > 0)
+    {
+      if (inputString[lookAheadIndex] == '$')
+      {
+        if (flag == 2)
+        {
+          printf("%10s    %10s    -----\n", parseStack.c_str(), inputString + lookAheadIndex);
+          cout << "Given string is accepted.\n";
+          break;
+        }
+        flag = 1;
+      }
+      flag = 2;
+      if (terminals.find(parseStack.back()) != terminals.end())
+      {
+        if (parseStack.back() != inputString[lookAheadIndex])
+        {
+          flag = 1;
+          break;
+        }
+        printf("%10s    %10s    pop(%c)\n", parseStack.c_str(), inputString + lookAheadIndex, inputString[lookAheadIndex]);
+
+        parseStack.pop_back();
+        lookAheadIndex++;
+        flag = 0;
+      }
+      else if (nonTerminals.find(parseStack.back()) != nonTerminals.end())
+      {
+        top = parseStack.back();
+        m = findInVector(LLParseTableRow, top);
+        n = findInVector(LLParseTableColumn, inputString[lookAheadIndex]);
+        if (m == -1 || n == -1)
+        {
+          flag = 1;
+          break;
+        }
+        ruleNumber = LLParseTable[m][n];
+        if (ruleNumber == -1)
+        {
+          flag = 1;
+          break;
+        }
+        printf("%10s    %10s    ", parseStack.c_str(), inputString + lookAheadIndex);
+        // printVector(CFG2D[ruleNumber]);
+        printRule(CFG2D, ruleNumber);
+        cout << endl;
+        parseStack.pop_back();
+        for (auto reverseItr = CFG2D[ruleNumber].rbegin(); reverseItr != CFG2D[ruleNumber].rend(); reverseItr++)
+        {
+          parseStack.push_back(*reverseItr);
+        }
+        parseStack.pop_back();
+
+        if (parseStack.back() == '#')
+          parseStack.pop_back();
+        flag = 0;
+      }
+    }
+    if (flag == 1)
+    {
+      cout << "Given string is not accepted.\n";
+    }
+  }
+
+  printf("\nExiting...\n");
 
   return 0;
 }
